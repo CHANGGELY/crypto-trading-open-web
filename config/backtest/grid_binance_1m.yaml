@@ -1,0 +1,9 @@
+min_price: 100.0
+max_price: 200.0
+grid_step: 1.0
+base_qty: 0.001
+maker_fee_bps: 1.0
+taker_fee_bps: 5.0
+match_mode: maker
+csv: data/sample_1m.csv
+out: results/sample_result.json
