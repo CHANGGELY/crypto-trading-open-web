@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>回测结果展示</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+</head>
+<body>
+  <header>
+    <h1>回测结果展示</h1>
+    <div class="files">
+      <select id="文件选择" multiple size="4"></select>
+      <select id="时间框">
+        <option value="1min">1m</option>
+        <option value="5min">5m</option>
+        <option value="15min" selected>15m</option>
+        <option value="1H">1H</option>
+        <option value="4H">4H</option>
+        <option value="1D">1D</option>
+      </select>
+      <button id="加载按钮">加载</button>
+    </div>
+  </header>
+  <main>
+    <section class="metrics">
+      <div class="metric"><span>Sharpe</span><strong id="m_sharpe">-</strong></div>
+      <div class="metric"><span>最大回撤</span><strong id="m_dd">-</strong></div>
+      <div class="metric"><span>胜率</span><strong id="m_win">-</strong></div>
+      <div class="metric"><span>周转率</span><strong id="m_turnover">-</strong></div>
+      <div class="metric"><span>总盈亏</span><strong id="m_total">-</strong></div>
+      <div class="metric"><span>配对次数</span><strong id="m_pairs">-</strong></div>
+    </section>
+    <section class="charts">
+      <div class="chart">
+        <h2>价格图</h2>
+        <div id="price"></div>
+        <div id="tradeDetail" style="display:none;position:relative;padding:8px;border:1px solid #eee;border-radius:8px;margin-top:8px"></div>
+      </div>
+      <div class="chart">
+        <h2>净值对比</h2>
+        <div id="nav"></div>
+      </div>
+      <div class="chart">
+        <h2>回测图像</h2>
+        <img id="plotImg" alt="回测图像">
+      </div>
+    </section>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>

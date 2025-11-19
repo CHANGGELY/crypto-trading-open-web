@@ -7,3 +7,5 @@ taker_fee_bps: 5.0
 match_mode: maker
 csv: data/sample_1m.csv
 out: results/sample_result.json
+initial_capital: 10000.0
+plot_out: results/sample_plot.png
