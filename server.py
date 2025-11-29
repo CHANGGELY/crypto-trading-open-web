@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
 import json
 import os
 from urllib.parse import urlparse, parse_qs
 from http.server import HTTPServer, SimpleHTTPRequestHandler
+import pandas as pd
 
 根 = os.path.dirname(__file__)
 前端目录 = os.path.join(根, "web")
@@ -89,21 +91,29 @@ class 接口处理(SimpleHTTPRequestHandler):
                 j = json.load(f)
             缓存 = j.get("cache")
             if not 缓存 or not os.path.exists(缓存):
-                self.send_response(404)
-                self.end_headers()
-                return
+                # 如果JSON中没有cache字段，使用默认的H5文件
+                默认缓存 = "ETHUSDT_1m_2019-11-01_to_2025-06-15.table.h5"
+                if os.path.exists(默认缓存):
+                    缓存 = 默认缓存
+                else:
+                    self.send_response(404)
+                    self.end_headers()
+                    return
             df = None
             try:
                 if 缓存.endswith(".parquet"):
                     df = pd.read_parquet(缓存)
+                elif 缓存.endswith(".h5") or 缓存.endswith(".hdf5"):
+                    df = pd.read_hdf(缓存)
                 else:
                     df = pd.read_csv(缓存)
-            except Exception:
+            except Exception as e:
+                print(f"读取数据文件失败: {e}")
                 self.send_response(500)
                 self.end_headers()
                 return
             tcol = None
-            for c in ["timestamp", "time", "candle_begin_time"]:
+            for c in ["timestamp", "time", "candle_begin_time", "candle_begin_time_GMT8"]:
                 if c in df.columns:
                     tcol = c
                     break
@@ -137,63 +147,72 @@ class 接口处理(SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps({"bars": js}, ensure_ascii=False).encode("utf-8"))
             return
         if u.path == "/api/trades":
-            qs = parse_qs(u.query)
-            名 = qs.get("name", [None])[0]
-            if not 名:
-                self.send_response(400)
-                self.end_headers()
-                return
-            路 = None
-            for c in [os.path.join(根, 名), os.path.join(根, "data", "cache", 名)]:
-                if os.path.exists(c):
-                    路 = c
-                    break
-            if not 路:
-                self.send_response(404)
-                self.end_headers()
-                return
-            with open(路, "r", encoding="utf-8") as f:
-                j = json.load(f)
-            tsf = lambda x: int(pd.Timestamp(int(x), unit="ms").timestamp()) if isinstance(x, (int, float)) else int(pd.Timestamp(x).timestamp())
-            out = []
-            for t in j.get("trade_marks", []):
-                out.append({
-                    "time": tsf(t.get("ts")),
-                    "position": "belowBar" if t.get("side") == "BUY" else "aboveBar",
-                    "shape": "arrowUp" if t.get("side") == "BUY" else "arrowDown",
-                    "color": "#2ecc71" if t.get("side") == "BUY" else "#e74c3c",
-                    "text": f"{t.get('offset')} {t.get('qty')}@{round(float(t.get('price', 0.0)),4)}\nfee:{round(float(t.get('fee',0.0)),4)} {t.get('mode','')}\npair:{round(float(t.get('pair_profit',0.0)),4)}"
-                })
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json; charset=utf-8")
-            self.end_headers()
-            self.wfile.write(json.dumps({"markers": out}, ensure_ascii=False).encode("utf-8"))
-            return
-        if u.path == "/api/nav":
-            qs = parse_qs(u.query)
-            名们 = qs.get("names", [""])[0]
-            名列 = [x.strip() for x in 名们.split(",") if x.strip()]
-            out = []
-            for 名 in 名列:
+            try:
+                qs = parse_qs(u.query)
+                名 = qs.get("name", [None])[0]
+                if not 名:
+                    self.send_response(400)
+                    self.end_headers()
+                    return
                 路 = None
                 for c in [os.path.join(根, 名), os.path.join(根, "data", "cache", 名)]:
                     if os.path.exists(c):
                         路 = c
                         break
                 if not 路:
-                    continue
+                    self.send_response(404)
+                    self.end_headers()
+                    return
                 with open(路, "r", encoding="utf-8") as f:
                     j = json.load(f)
-                series = []
-                for s in j.get("nav_series", []):
-                    ts = s.get("ts")
-                    tsec = int(pd.Timestamp(int(ts), unit="ms").timestamp()) if isinstance(ts, (int, float)) else int(pd.Timestamp(ts).timestamp())
-                    series.append({"time": tsec, "value": float(s.get("nav", 0.0))})
-                out.append({"name": 名, "series": series})
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json; charset=utf-8")
-            self.end_headers()
-            self.wfile.write(json.dumps({"navs": out}, ensure_ascii=False).encode("utf-8"))
+                tsf = lambda x: int(pd.Timestamp(int(x), unit="ms").timestamp()) if (isinstance(x, (int, float)) or (isinstance(x, str) and x.isdigit())) else int(pd.Timestamp(x).timestamp())
+                items = j.get("trade_marks", [])
+                out = []
+                for t in items:
+                    out.append({
+                        "time": tsf(t.get("ts")),
+                        "position": "belowBar" if t.get("side") == "BUY" else "aboveBar",
+                        "shape": "arrowUp" if t.get("side") == "BUY" else "arrowDown",
+                        "color": "#2ecc71" if t.get("side") == "BUY" else "#e74c3c",
+                        "text": f"{t.get('offset')} {t.get('qty')}@{round(float(t.get('price', 0.0)),4)}\nfee:{round(float(t.get('fee',0.0)),4)} {t.get('mode','')}\npair:{round(float(t.get('pair_profit',0.0)),4)}"
+                    })
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.end_headers()
+                self.wfile.write(json.dumps({"markers": out, "items": items}, ensure_ascii=False).encode("utf-8"))
+            except Exception:
+                self.send_response(500)
+                self.end_headers()
+            return
+        if u.path == "/api/nav":
+            try:
+                qs = parse_qs(u.query)
+                名们 = qs.get("names", [""])[0]
+                名列 = [x.strip() for x in 名们.split(",") if x.strip()]
+                out = []
+                for 名 in 名列:
+                    路 = None
+                    for c in [os.path.join(根, 名), os.path.join(根, "data", "cache", 名)]:
+                        if os.path.exists(c):
+                            路 = c
+                            break
+                    if not 路:
+                        continue
+                    with open(路, "r", encoding="utf-8") as f:
+                        j = json.load(f)
+                    series = []
+                    for s in j.get("nav_series", []):
+                        ts = s.get("ts")
+                        tsec = int(pd.Timestamp(int(ts), unit="ms").timestamp()) if (isinstance(ts, (int, float)) or (isinstance(ts, str) and ts.isdigit())) else int(pd.Timestamp(ts).timestamp())
+                        series.append({"time": tsec, "value": float(s.get("nav", 0.0))})
+                    out.append({"name": 名, "series": series})
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.end_headers()
+                self.wfile.write(json.dumps({"navs": out}, ensure_ascii=False).encode("utf-8"))
+            except Exception:
+                self.send_response(500)
+                self.end_headers()
             return
         return super().do_GET()
 
@@ -207,5 +226,3 @@ def 启动(端口=8000):
 
 if __name__ == "__main__":
     启动()
-import pandas as pd
-import json

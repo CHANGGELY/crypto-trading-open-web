@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>图表测试</title>
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+</head>
+<body>
+    <h1>图表库测试</h1>
+    <div id="chart" style="width: 800px; height: 400px;"></div>
+    <div id="debug"></div>
+
+    <script>
+        const debug = document.getElementById('debug');
+
+        function log(msg) {
+            console.log(msg);
+            debug.innerHTML += msg + '<br>';
+        }
+
+        log('开始测试...');
+
+        if (typeof window.LightweightCharts === 'undefined') {
+            log('❌ 图表库未加载');
+        } else {
+            log('✅ 图表库已加载');
+
+            if (typeof window.LightweightCharts.createChart === 'function') {
+                log('✅ createChart函数可用');
+
+                try {
+                    const chart = LightweightCharts.createChart(document.getElementById('chart'), {
+                        width: 800,
+                        height: 400,
+                        layout: { textColor: '#222', background: { color: '#fff' } }
+                    });
+
+                    const lineSeries = chart.addLineSeries({ color: '#2196F3' });
+
+                    // 测试数据
+                    const testData = [
+                        { time: 1648771200, value: 2596.28 },
+                        { time: 1648857600, value: 2527.08 },
+                        { time: 1648944000, value: 2650.45 },
+                        { time: 1649030400, value: 2700.12 }
+                    ];
+
+                    lineSeries.setData(testData);
+                    chart.timeScale().fitContent();
+
+                    log('✅ 图表创建成功');
+                } catch (error) {
+                    log('❌ 图表创建失败: ' + error.message);
+                }
+            } else {
+                log('❌ createChart函数不可用');
+            }
+        }
+    </script>
+</body>
+</html>

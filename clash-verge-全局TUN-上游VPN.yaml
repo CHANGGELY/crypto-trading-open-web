@@ -1,0 +1,41 @@
+mode: rule
+ipv6: false
+proxies:
+  - name: 上游VPN
+    type: socks5
+    server: 127.0.0.1
+    port: 10808
+proxy-groups:
+  - name: 全局出口
+    type: select
+    proxies:
+      - 上游VPN
+      - DIRECT
+rules:
+  - IP-CIDR,192.168.0.0/16,DIRECT,no-resolve
+  - IP-CIDR,10.0.0.0/8,DIRECT,no-resolve
+  - IP-CIDR,172.16.0.0/12,DIRECT,no-resolve
+  - IP-CIDR,127.0.0.0/8,DIRECT,no-resolve
+  - DOMAIN-SUFFIX,localhost,DIRECT
+  - PROCESS-NAME,clash-verge.exe,DIRECT
+  - PROCESS-NAME,mihomo.exe,DIRECT
+  - MATCH,全局出口
+tun:
+  enable: true
+  stack: gvisor
+  auto-route: true
+  strict-route: true
+  auto-detect-interface: true
+  mtu: 1400
+  dns-hijack:
+    - any:53
+dns:
+  enable: true
+  enhanced-mode: fake-ip
+  prefer-h3: true
+  nameserver:
+    - system
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+  fallback:
+    - https://1.0.0.1/dns-query

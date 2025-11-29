@@ -1,12 +1,23 @@
-*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto}
-header{display:flex;justify-content:space-between;align-items:center;padding:16px;border-bottom:1px solid #eee}
-h1{margin:0;font-size:20px}
+*{box-sizing:border-box}
+:root{--bg:#0b0f19;--card:rgba(255,255,255,0.08);--border:rgba(255,255,255,0.12);--text:#e6e8eb;--muted:#9aa4af;--accent:#0a84ff;--accent2:#ff9f0a}
+body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto;background:linear-gradient(120deg,#0b0f19 0%,#101726 50%,#0b0f19 100%);color:var(--text)}
+header{display:flex;justify-content:space-between;align-items:center;padding:16px;border-bottom:1px solid var(--border);backdrop-filter:saturate(140%) blur(8px);background:linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))}
+h1{margin:0;font-size:20px;color:var(--text)}
 .files{display:flex;gap:8px}
+.files select,.files button{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:8px 10px}
+.files button{cursor:pointer}
+.files button:hover{border-color:var(--accent);box-shadow:0 0 0 3px rgba(10,132,255,0.2)}
 main{padding:16px;max-width:1200px;margin:0 auto}
 .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
-.metric{display:flex;justify-content:space-between;align-items:center;padding:12px;border:1px solid #eee;border-radius:8px}
-.metric span{color:#666}
+.metric{display:flex;justify-content:space-between;align-items:center;padding:12px;border:1px solid var(--border);border-radius:14px;background:var(--card);box-shadow:0 8px 24px rgba(0,0,0,0.25)}
+.metric span{color:var(--muted)}
+.metric strong{color:var(--accent2)}
 .chart{margin-bottom:24px}
-.chart h2{font-size:16px;margin:0 0 8px 0}
-img{max-width:100%;border:1px solid #eee;border-radius:8px}
-#price,#nav{width:100%;height:360px;border:1px solid #eee;border-radius:8px}
+.chart h2{font-size:16px;margin:0 0 8px 0;color:var(--text)}
+.toolbar{display:flex;gap:8px;margin-bottom:8px}
+.toolbar button{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:6px 10px;cursor:pointer}
+.toolbar button:hover{border-color:var(--accent);box-shadow:0 0 0 3px rgba(10,132,255,0.2)}
+.toolbar .toggle{display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--card);border:1px solid var(--border);border-radius:10px}
+.toolbar .toggle input{accent-color:var(--accent)}
+img{max-width:100%;border:1px solid var(--border);border-radius:14px;background:var(--card)}
+#price,#nav{width:100%;height:360px;border:1px solid var(--border);border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02));box-shadow:0 8px 24px rgba(0,0,0,0.25)}
