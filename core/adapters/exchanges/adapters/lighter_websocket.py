@@ -522,6 +522,10 @@ class LighterWebSocket(LighterBase):
                 logger.error("❌ WebSocket URL未配置，无法创建WebSocket客户端")
                 return
 
+            # 安全说明：此处的 "ws://" 仅用于从配置 URL 中剥离协议前缀（容错处理），
+            # 并非建立明文连接。本模块为服务端 WebSocket 客户端（非浏览器应用），
+            # 实际连接地址来自配置文件（lighter_config.yaml），主网/测试网均为
+            # wss://（TLS 加密），不存在明文传输问题。
             ws_host = self.ws_url.replace("wss://", "").replace("ws://", "")
             # 如果URL中包含路径，去掉路径（SDK会自动添加/stream）
             if "/" in ws_host:
