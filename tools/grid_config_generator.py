@@ -736,13 +736,16 @@ class GridConfigGenerator:
         try:
             import subprocess
             # 🔥 自动输入 "y" 来确认同步（避免脚本卡住等待输入）
+            # 安全说明：使用列表参数并显式 shell=False，避免 shell 命令注入；
+            # sync_script 来自受控配置文件，config_filename 仅作为单个参数传递
             result = subprocess.run(
                 [str(sync_script), config_filename],
                 cwd=self.tool_dir,
                 input="y\n",  # 自动确认
                 capture_output=True,
                 text=True,
-                timeout=30  # 30秒超时
+                timeout=30,  # 30秒超时
+                shell=False
             )
 
             if result.returncode == 0:
