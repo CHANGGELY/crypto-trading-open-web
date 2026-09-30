@@ -14,7 +14,10 @@
 
         function log(msg) {
             console.log(msg);
-            debug.innerHTML += msg + '<br>';
+            // 使用 textContent 安全插入，避免不可信内容导致的 XSS
+            const line = document.createElement('div');
+            line.textContent = msg;
+            debug.appendChild(line);
         }
 
         log('开始测试...');

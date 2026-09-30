@@ -20,6 +20,16 @@ let 原始MA5 = [], 原始MA10 = [], 原始MA20 = [], 原始VOL = []
 let ma5Map = new Map(), ma10Map = new Map(), ma20Map = new Map()
 const 详情 = document.getElementById('tradeDetail')
 
+// HTML 转义：所有拼入 innerHTML 的动态内容必须先经过此函数，防止 XSS
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 function 调试信息(msg) {
   console.log(msg)
   debugInfo.textContent += new Date().toLocaleTimeString() + ': ' + msg + '\n'
@@ -115,7 +125,7 @@ async function 渲染价格(name, tf){
     if(!r.ok){
       const txt = await r.text()
       调试信息(`获取OHLC失败: ${r.status} - ${txt}`)
-      container.innerHTML = `<div style="padding:20px;text-align:center;color:#e74c3c;">获取数据失败: ${r.status}</div>`
+      container.innerHTML = `<div style="padding:20px;text-align:center;color:#e74c3c;">获取数据失败: ${escapeHtml(r.status)}</div>`
       return
     }
 
@@ -167,7 +177,7 @@ async function 渲染价格(name, tf){
   } catch(error){
     调试信息(`渲染价格图错误: ${error.message}`)
     console.error('渲染价格图错误:', error)
-    container.innerHTML = `<div style="padding:20px;text-align:center;color:#e74c3c;">渲染错误: ${error.message}</div>`
+    container.innerHTML = `<div style="padding:20px;text-align:center;color:#e74c3c;">渲染错误: ${escapeHtml(error.message)}</div>`
   }
 }
 
@@ -202,7 +212,7 @@ async function 渲染交易标记(name){
       const price = x.price
       const qty = x.qty
       const pp = x.pair_profit
-      return `<tr><td>${ts}</td><td>${side}</td><td>${price}</td><td>${qty}</td><td>${pp}</td></tr>`
+      return `<tr><td>${escapeHtml(ts)}</td><td>${escapeHtml(side)}</td><td>${escapeHtml(price)}</td><td>${escapeHtml(qty)}</td><td>${escapeHtml(pp)}</td></tr>`
     }).join('')
     详情.innerHTML = `<table style="width:100%;border-collapse:collapse"><thead><tr style="text-align:left"><th>时间</th><th>方向</th><th>价格</th><th>数量</th><th>配对盈亏</th></tr></thead><tbody>${行}</tbody></table>`
     详情.style.display = 'block'
@@ -220,7 +230,7 @@ async function 渲染交易标记(name){
         return `${side} ${x.qty}@${x.price} 配对盈亏:${x.pair_profit}`
       }).join(' | ')
       const 提示 = 附? `${文本} | 交易:${附}` : 文本
-      详情.innerHTML = `<div>${提示}</div>`
+      详情.innerHTML = `<div>${escapeHtml(提示)}</div>`
     })
   } catch(error){
     调试信息(`渲染交易标记错误: ${error.message}`)
@@ -285,7 +295,7 @@ async function 渲染净值对比(names){
     if(!r.ok){
       const txt = await r.text().catch(()=> '')
       调试信息(`获取净值数据失败: ${r.status} ${txt}`)
-      container.innerHTML = `<div style="padding:20px;text-align:center;color:#e74c3c;">获取净值数据失败: ${r.status}</div>`
+      container.innerHTML = `<div style="padding:20px;text-align:center;color:#e74c3c;">获取净值数据失败: ${escapeHtml(r.status)}</div>`
       return
     }
     const j = await r.json().catch(()=> ({navs: []}))
@@ -312,7 +322,7 @@ async function 渲染净值对比(names){
     navChart.timeScale().fitContent()
   } catch(error){
     调试信息(`渲染净值图错误: ${error.message}`)
-    container.innerHTML = `<div style="padding:20px;text-align:center;color:#e74c3c;">渲染错误: ${error.message}</div>`
+    container.innerHTML = `<div style="padding:20px;text-align:center;color:#e74c3c;">渲染错误: ${escapeHtml(error.message)}</div>`
   }
 }
 
