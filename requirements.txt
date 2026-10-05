@@ -15,7 +15,7 @@ injector==0.21.0              # 依赖注入容器
 # 🔄 异步和网络 (Async & Networking)
 # ────────────────────────────────────────────────────────────────────────────
 asyncio                       # 异步编程（Python 内置）
-aiohttp==3.12.14              # 异步 HTTP 客户端（3.12.14 修复 header injection 漏洞 CVE-2025-53943）
+aiohttp==3.14.3               # 异步 HTTP 客户端（3.14.3 清空全部 OSV 公告；注意需要 Python>=3.10）
 websockets==12.0              # WebSocket 客户端/服务器
 websocket-client==1.6.4       # 同步 WebSocket 客户端（某些库需要）
 
